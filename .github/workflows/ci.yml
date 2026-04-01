@@ -6,7 +6,8 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test-web:
+    name: "🌐 Testes Web - Blog do Agi"
     runs-on: ubuntu-latest
 
     steps:
@@ -26,5 +27,41 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      - name: Rodar testes
-        run: mvn clean test
+      - name: Rodar testes Web
+        run: mvn clean test -pl teste-blogdoagi
+
+  test-api:
+    name: "🐕 Testes API - Dog API"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Rodar testes API
+        run: mvn clean test -pl teste-dogapi
+
+      - name: Gerar relatório Allure
+        if: always()
+        run: mvn allure:report -pl teste-dogapi
+        continue-on-error: true
+
+      - name: Upload relatório Allure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: teste-dogapi/target/site/allure-maven-plugin/
+
+      - name: Upload resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: teste-dogapi/target/surefire-reports/
