@@ -28,13 +28,13 @@ jobs:
 
       - name: Executar Automação (Web, API e Performance)
         run: |
-         # 1. Roda Web e API
-         mvn clean test -pl teste-blogdoagi,teste-dogapi
+           # 1. Roda Web e API normalmente
+           mvn clean test -pl teste-blogdoagi,teste-dogapi
             
-         # 2. Roda Performance de forma isolada e FORÇADA
-         # O comando 'install' ajuda a consolidar as dependências do pai no ambiente do GitHub
-         mvn clean install -DskipTests
-         mvn verify -f teste-performance/pom.xml
+          # 2. Força a execução da Performance de forma isolada
+          # Entrar na pasta e chamar o plugin DIRETAMENTE garante que ele rode
+          cd teste-performance
+          mvn jmeter:jmeter jmeter:results jmeter:report
         continue-on-error: true
 
       - name: Unificar Resultados Allure
@@ -65,31 +65,29 @@ jobs:
       - name: Integrar Relatório JMeter
         if: always()
         run: |
-          # Busca o index.html em qualquer lugar (agora com o -f ele VAI existir)
-          REPORT_HTML=$(find . -name "index.html" | grep "jmeter/reports" | head -n 1)
+          # Busca o index.html gerado pelo comando direto do plugin
+          REPORT_HTML=$(find . -name "index.html" | grep "jmeter" | head -n 1)
             
           if [ -n "$REPORT_HTML" ]; then
-            REPORT_DIR=$(dirname "$REPORT_HTML")
-            echo "Relatório JMeter localizado em: $REPORT_DIR"
+          REPORT_DIR=$(dirname "$REPORT_HTML")
+          echo "Relatório JMeter localizado em: $REPORT_DIR"
             
-            # Dá permissão total para não termos erro de 'Denied'
-            sudo chmod -R 777 allure-history
+          sudo chmod -R 777 allure-history
             
-            # INJEÇÃO CRÍTICA:
-            # 1. Coloca na pasta numerada (ex: /43/performance)
-            CURRENT_RUN=$(ls -t allure-history | grep -E '^[0-9]+$' | head -n 1)
-            mkdir -p allure-history/$CURRENT_RUN/performance
-            cp -r $REPORT_DIR/* allure-history/$CURRENT_RUN/performance/
+          # Pega a run atual (ex: 45)
+          CURRENT_RUN=$(ls -t allure-history | grep -E '^[0-9]+$' | head -n 1)
             
-            # 2. Coloca na RAIZ do deploy (para o link fixo funcionar)
-            mkdir -p allure-history/performance
-            cp -r $REPORT_DIR/* allure-history/performance/
+          # Injeta na raiz do deploy E na pasta numerada
+          mkdir -p allure-history/performance
+          mkdir -p allure-history/$CURRENT_RUN/performance
             
-            echo "Sucesso: Relatório disponível em /performance/ e /$CURRENT_RUN/performance/"
-          else
-            echo "Aviso: Pasta target/jmeter/reports não encontrada. Listando arquivos para debug:"
-            find . -maxdepth 4 -name "target"
-          fi
+          cp -r $REPORT_DIR/* allure-history/performance/
+          cp -r $REPORT_DIR/* allure-history/$CURRENT_RUN/performance/
+            
+          echo "Sucesso: Relatórios injetados."
+         else
+          echo "Aviso: O JMeter não gerou o relatório HTML. Verifique os logs de 'Executar Automação'."
+         fi
 
       - name: Deploy para GitHub Pages
         if: always()
