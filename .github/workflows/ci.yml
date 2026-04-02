@@ -21,23 +21,23 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Instalar Chrome (para o módulo Web)
+      - name: Instalar Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      - name: Executar todos os módulos
-        run: mvn clean test
+      # Roda Web e API (test) e depois Performance (verify)
+      - name: Executar Automação (Web, API e Performance)
+        run: |
+          mvn clean test
+          mvn verify -pl teste-performance
         continue-on-error: true
 
       - name: Unificar Resultados Allure
         if: always()
         run: |
-           mkdir -p all-results
-           echo "Buscando resultados nos módulos..."
-           find . -type d -name "allure-results" -not -path "./all-results/*" -exec cp -r {}/. all-results/ \;
-           echo "Arquivos coletados em all-results:"
-           ls -R all-results
+          mkdir -p all-results
+          find . -type d -name "allure-results" -not -path "./all-results/*" -exec cp -r {}/. all-results/ \;
 
       - name: Carregar histórico do Allure (gh-pages)
         uses: actions/checkout@v4
@@ -50,6 +50,7 @@ jobs:
       - name: Allure Report Action
         uses: simple-elf/allure-report-action@master
         if: always()
+        id: allure_report
         with:
           allure_results: "all-results"
           gh_pages: gh-pages-dir
@@ -57,7 +58,16 @@ jobs:
           allure_history: allure-history
           keep_reports: 20
 
-      - name: Deploy do Relatório para o GitHub Pages
+      # ORGANIZAÇÃO FINAL: Coloca o JMeter dentro da pasta do Allure para o Deploy
+      - name: Integrar Relatório JMeter
+        if: always()
+        run: |
+          mkdir -p allure-history/performance
+          if [ -d "teste-performance/target/jmeter/reports/blazedemo_test" ]; then
+            cp -r teste-performance/target/jmeter/reports/blazedemo_test/* allure-history/performance/
+          fi
+
+      - name: Deploy para GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:
