@@ -28,12 +28,10 @@ jobs:
 
       - name: Executar Automação (Web, API e Performance)
         run: |
-          # O parâmetro -DskipAfterFailureCount=0 e -fn (fail-never) força o Maven a continuar
+          # 1. Roda Web e API (ignora falhas para seguir adiante)
           mvn clean test -pl teste-blogdoagi,teste-dogapi -fn
-            
-          # Agora garantimos que a performance rode mesmo se a API falhou
           cd teste-performance
-          mvn jmeter:jmeter jmeter:results jmeter:report
+          mvn jmeter:jmeter jmeter:results
         continue-on-error: true
 
       - name: Unificar Resultados Allure
@@ -64,30 +62,24 @@ jobs:
       - name: Integrar Relatório JMeter
         if: always()
         run: |
-          # Busca o index.html gerado pelo comando direto do plugin
+           # Procura qualquer index.html que não esteja nas pastas do Allure
           REPORT_HTML=$(find . -name "index.html" | grep "jmeter" | head -n 1)
-          
+            
           if [ -n "$REPORT_HTML" ]; then
             REPORT_DIR=$(dirname "$REPORT_HTML")
-            echo "Relatório JMeter localizado em: $REPORT_DIR"
-          
+            echo "Relatório encontrado em: $REPORT_DIR"
+            
             sudo chmod -R 777 allure-history
-          
-            # Pega a run atual
             CURRENT_RUN=$(ls -t allure-history | grep -E '^[0-9]+$' | head -n 1)
-          
-            # Injeta na raiz do deploy E na pasta numerada
+            
             mkdir -p allure-history/performance
             mkdir -p allure-history/$CURRENT_RUN/performance
-          
+            
             cp -r $REPORT_DIR/* allure-history/performance/
             cp -r $REPORT_DIR/* allure-history/$CURRENT_RUN/performance/
-          
-            echo "Sucesso: Relatórios injetados."
           else
-            echo "Aviso: O JMeter não gerou o relatório HTML."
+            echo "Aviso: Relatório HTML não encontrado. Verifique se a pasta target/jmeter/reports foi criada."
           fi
-
       - name: Deploy para GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v3
