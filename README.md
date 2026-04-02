@@ -50,12 +50,13 @@ Teste de carga e resiliência na plataforma [BlazeDemo](https://www.blazedemo.co
 
 ## 📊 Relatórios e Observabilidade
 
-Os resultados são consolidados automaticamente pelo Allure a cada pipeline.
+Os resultados são consolidados e publicados automaticamente a cada execução da pipeline.
 
-🔗 **[Acesse o Dashboard do Allure Report](https://martyello.github.io/testes-automacao-agibank/)**
+* 🧪 **[Dashboard Allure Report](https://martyello.github.io/testes-automacao-agibank/)**
+  *(Visão consolidada de Web e API com screenshots e histórico de tendências)*
 
-*O dashboard inclui screenshots de falhas Web e logs detalhados das requisições de API.*
-
+* 📈 **[Relatório de Performance (JMeter HTML)](https://martyello.github.io/testes-automacao-agibank/performance/)**
+  *(Métricas detalhadas de Throughput, Latência e Gráficos de Over Time)*
 ---
 
 ## 🛠️ Execução Local
@@ -68,9 +69,9 @@ Os resultados são consolidados automaticamente pelo Allure a cada pipeline.
 | Objetivo | Comando |
 | :--- | :--- |
 | **Executar Todos os Testes** | `mvn clean verify` |
-| **Apenas Web** | `mvn clean test -pl teste-blogdoagi` |
-| **Apenas API** | `mvn clean test -pl teste-dogapi` |
-| **Apenas Performance** | `mvn clean verify -pl teste-performance` |
+| **Apenas Web** | `mvn clean test -pl teste-blogdoagi -am` |
+| **Apenas API** | `mvn clean test -pl teste-dogapi -am` |
+| **Apenas Performance** | `mvn clean verify -pl teste-performance -am` |
 | **Gerar/Abrir Allure** | `mvn allure:serve` |
 
 ---

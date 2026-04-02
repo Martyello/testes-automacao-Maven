@@ -28,11 +28,7 @@ jobs:
 
       - name: Executar Automação (Web, API e Performance)
         run: |
-          # 1. Roda Web e API (continua mesmo com falhas)
           mvn clean test -pl teste-blogdoagi,teste-dogapi -fn
-            
-          # 2. Performance: Usa o ciclo de vida completo apontando para o POM do módulo
-          # O comando 'verify' vai disparar o configure, jmeter e results que estão no seu POM
           mvn clean verify -f teste-performance/pom.xml -DskipTests=false
         continue-on-error: true
 
