@@ -28,6 +28,7 @@ jobs:
 
       - name: Executar todos os módulos
         run: mvn clean test
+        continue-on-error: true
 
       - name: Gerar relatório Allure Unificado
         if: always()

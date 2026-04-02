@@ -41,7 +41,7 @@ build/
 target/
 
 # Pastas de relatórios e resultados do Allure (Raiz e Módulos)
-**/allure-results/
+/allure-results/
 **/allure-report/
 **/.allure/
 
