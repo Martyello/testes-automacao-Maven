@@ -30,13 +30,31 @@ jobs:
         run: mvn clean test
         continue-on-error: true
 
-      - name: Gerar relatório Allure Unificado
+      - name: Gerar Relatório Allure
         if: always()
         run: mvn allure:report
 
-      - name: Upload Allure Report
+      - name: Carregar histórico do Allure (gh-pages)
+        uses: actions/checkout@v4
         if: always()
-        uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
-          name: relatorio-unificado-allure
-          path: "**/target/site/allure-maven-plugin/"
+          ref: gh-pages
+          path: gh-pages-dir
+
+      - name: Allure Report Action
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: "**/allure-results"
+          gh_pages: gh-pages-dir
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy do Relatório para o GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
