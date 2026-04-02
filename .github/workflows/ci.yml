@@ -28,11 +28,10 @@ jobs:
 
       - name: Executar Automação (Web, API e Performance)
         run: |
-           # 1. Roda Web e API normalmente
-           mvn clean test -pl teste-blogdoagi,teste-dogapi
-            
+          # 1. Roda Web e API normalmente
+          mvn clean test -pl teste-blogdoagi,teste-dogapi
+          
           # 2. Força a execução da Performance de forma isolada
-          # Entrar na pasta e chamar o plugin DIRETAMENTE garante que ele rode
           cd teste-performance
           mvn jmeter:jmeter jmeter:results jmeter:report
         continue-on-error: true
@@ -67,27 +66,27 @@ jobs:
         run: |
           # Busca o index.html gerado pelo comando direto do plugin
           REPORT_HTML=$(find . -name "index.html" | grep "jmeter" | head -n 1)
-            
+          
           if [ -n "$REPORT_HTML" ]; then
-          REPORT_DIR=$(dirname "$REPORT_HTML")
-          echo "Relatório JMeter localizado em: $REPORT_DIR"
-            
-          sudo chmod -R 777 allure-history
-            
-          # Pega a run atual (ex: 45)
-          CURRENT_RUN=$(ls -t allure-history | grep -E '^[0-9]+$' | head -n 1)
-            
-          # Injeta na raiz do deploy E na pasta numerada
-          mkdir -p allure-history/performance
-          mkdir -p allure-history/$CURRENT_RUN/performance
-            
-          cp -r $REPORT_DIR/* allure-history/performance/
-          cp -r $REPORT_DIR/* allure-history/$CURRENT_RUN/performance/
-            
-          echo "Sucesso: Relatórios injetados."
-         else
-          echo "Aviso: O JMeter não gerou o relatório HTML. Verifique os logs de 'Executar Automação'."
-         fi
+            REPORT_DIR=$(dirname "$REPORT_HTML")
+            echo "Relatório JMeter localizado em: $REPORT_DIR"
+          
+            sudo chmod -R 777 allure-history
+          
+            # Pega a run atual
+            CURRENT_RUN=$(ls -t allure-history | grep -E '^[0-9]+$' | head -n 1)
+          
+            # Injeta na raiz do deploy E na pasta numerada
+            mkdir -p allure-history/performance
+            mkdir -p allure-history/$CURRENT_RUN/performance
+          
+            cp -r $REPORT_DIR/* allure-history/performance/
+            cp -r $REPORT_DIR/* allure-history/$CURRENT_RUN/performance/
+          
+            echo "Sucesso: Relatórios injetados."
+          else
+            echo "Aviso: O JMeter não gerou o relatório HTML."
+          fi
 
       - name: Deploy para GitHub Pages
         if: always()
