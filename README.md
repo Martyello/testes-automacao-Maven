@@ -1,82 +1,86 @@
 # 🚀 Framework de Testes Unificados - Agibank
 
-Este repositório contém uma solução de automação **Full Stack**, cobrindo testes de **Interface Web** e **API REST**. A
-arquitetura foi desenhada em um modelo **multi-módulo Maven**, permitindo a execução independente ou combinada dos
-contextos de teste.
+Este repositório contém uma solução de automação **Full Stack**, cobrindo testes de **Interface Web**, **API REST** e **Performance**. A arquitetura utiliza um modelo **multi-módulo Maven**, permitindo a gestão independente de cada contexto de teste.
 
 ---
 
 ## 🏗️ Arquitetura e Tecnologias
 
-O projeto foi estruturado para ser escalável e de fácil manutenção, utilizando:
+Projeto estruturado para escalabilidade e manutenção simplificada:
 
 * **Linguagem:** Java 17 (LTS)
-* **Core:** JUnit 5 (Jupyter) para orquestração.
-* **API:** REST Assured com validação de **JSON Schema**.
-* **Web:** Selenium WebDriver (configurado para execução em **Headless Mode** no CI).
-* **Relatórios:** Allure Framework com histórico de execução (Trends).
-* **CI/CD:** GitHub Actions com deploy automático para **GitHub Pages**.
+* **Core:** JUnit 5 (Jupyter)
+* **API:** REST Assured com validação de **JSON Schema**
+* **Web:** Selenium WebDriver (configurado para **Headless Mode** em CI)
+* **Performance:** Apache JMeter 5.5 integrado via Maven
+* **Relatórios:** Allure Framework com histórico de execução (Trends)
+* **CI/CD:** GitHub Actions com deploy automático para **GitHub Pages**
 
 ---
 
 ## 🧪 Estratégia de Testes
 
 ### 1. Módulo Web (`teste-blogdoagi`)
-
-Focado na validação do mecanismo de busca do Blog Agibank.
-
+Validação do mecanismo de busca do Blog Agibank.
 * **Técnicas:** Testes de busca positiva, negativa, caracteres especiais e termos vazios.
-* **Destaque:** Implementação robusta de esperas (Waits) para lidar com a renderização de elementos assíncronos.
+* **Destaque:** Implementação de esperas (Waits) dinâmicas para garantir estabilidade em elementos assíncronos.
 
 ### 2. Módulo API (`teste-dogapi`)
+Consumo da [Dog CEO API](https://dog.ceo/dog-api/).
+* **Validações:** Status codes, estruturas de contrato (Schemas) e SLA de resposta.
+* **Cenários:** Cobertura de endpoints de raças, sub-raças e fluxos de exceção (404).
 
-Consome a [Dog CEO API](https://dog.ceo/dog-api/).
+### 3. Módulo Performance (`teste-performance`)
+Teste de carga e resiliência na plataforma [BlazeDemo](https://www.blazedemo.com).
+* **Cenário:** Fluxo transacional (Home > Reserva > Confirmação).
+* **Métricas Alvo:** 250 req/s | 90th percentile < 2s.
 
-* **Validações:** Status codes, estrutura do corpo (Schemas), tipos de dados e performance (SLA de resposta < 5s).
-* **Cenários:** Cobertura de endpoints de raças, sub-raças e imagens aleatórias, incluindo fluxos de exceção (404 e
-  parâmetros inválidos).
+#### 📊 Resultados Obtidos (Carga Estabilizada)
+
+| Sampler | Throughput (Req/s) | 90th Percentile | Taxa de Erro |
+| :--- | :--- | :--- | :--- |
+| **Geral (Fluxo Completo)** | **243.00/s** | **978 ms** | 0.00% |
+| **00 - Home (GET)** | **81.00/s** | **925 ms** | 0.00% |
+| **01 - Reservar (POST)** | **81.00/s** | **1102 ms** | 0.00% |
+| **02 - Confirmar (POST)** | **81.00/s** | **1133 ms** | 0.00% |
+
+> **Parecer Técnico:** O SLA de latência foi totalmente atendido (1.1s vs limite de 2s). A vazão estabilizou em 243 req/s sem erros durante o período de stress. observa-se que o relatório inclui sub-samplers de recursos estáticos (CSS/JS), isto garante que o teste reflite a carga real processada pelo servidor durante a navegação.
 
 ---
 
 ## 📊 Relatórios e Observabilidade
 
-Os relatórios são gerados automaticamente a cada execução do pipeline. O **Allure Report** consolida os resultados de
-ambos os módulos em um único dashboard navegável.
+Os resultados são consolidados automaticamente pelo Allure a cada pipeline.
 
-🔗 **[Acesse aqui o Allure Report do Projeto](https://martyello.github.io/testes-automacao-agibank/)**
+🔗 **[Acesse o Dashboard do Allure Report](https://martyello.github.io/testes-automacao-agibank/)**
 
-> **Nota:** O dashboard inclui screenshots em caso de falhas na camada Web e o log completo das requisições/respostas na
-> camada de API.
+*O dashboard inclui screenshots de falhas Web e logs detalhados das requisições de API.*
 
 ---
 
 ## 🛠️ Execução Local
 
 ### Pré-requisitos
+* JDK 17+ | Maven 3.6+ | Google Chrome atualizado.
 
-* JDK 17 ou superior.
-* Maven 3.6+.
-* Google Chrome (versão atualizada).
+### Comandos Principais
 
-### Comandos principais
-
-| Objetivo               | Comando                              |
-|:-----------------------|:-------------------------------------|
-| **Executar tudo**      | `mvn clean test`                     |
-| **Apenas Web**         | `mvn clean test -pl teste-blogdoagi` |
-| **Apenas API**         | `mvn clean test -pl teste-dogapi`    |
-| **Abrir Allure Local** | `mvn allure:serve`                   |
+| Objetivo | Comando |
+| :--- | :--- |
+| **Executar Todos os Testes** | `mvn clean verify` |
+| **Apenas Web** | `mvn clean test -pl teste-blogdoagi` |
+| **Apenas API** | `mvn clean test -pl teste-dogapi` |
+| **Apenas Performance** | `mvn clean verify -pl teste-performance` |
+| **Gerar/Abrir Allure** | `mvn allure:serve` |
 
 ---
 
 ## ⚙️ Pipeline de CI/CD
 
-O workflow no GitHub Actions (`.github/workflows/ci.yml`) executa as seguintes etapas:
-
-1. Setup do ambiente (Java, Chrome, Dependências).
-2. Execução dos testes via Maven.
-3. Coleta e unificação dos resultados do Allure.
-4. Publicação do relatório na branch `gh-pages`.
+O workflow no GitHub Actions (`.github/workflows/ci.yml`) segue as etapas:
+1. Setup de ambiente e dependências.
+2. Execução das suítes de teste via Maven.
+3. Consolidação de resultados e deploy para **GitHub Pages**.
 
 ---
 **Autor:** Marcelo Alexandre do Nascimento (Senior Test Analyst)

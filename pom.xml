@@ -11,6 +11,7 @@
     <modules>
         <module>teste-blogdoagi</module>
         <module>teste-dogapi</module>
+        <module>teste-performance</module>
     </modules>
 
     <properties>
