@@ -25,25 +25,28 @@
                 <artifactId>jmeter-maven-plugin</artifactId>
                 <version>3.7.0</version>
                 <executions>
-                    <execution>
-                        <id>configuration</id>
-                        <goals>
-                            <goal>configure</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>jmeter-tests</id>
-                        <goals>
-                            <goal>jmeter</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>jmeter-check-results</id>
-                        <goals>
-                            <goal>results</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <execution>
+                    <id>configuration</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                        <goal>configure</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>jmeter-tests</id>
+                    <phase>integration-test</phase>
+                    <goals>
+                        <goal>jmeter</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>jmeter-check-results</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>results</goal>
+                    </goals>
+                </execution>
+            </executions>
                 <configuration>
                     <generateReports>true</generateReports>
                     <errorRateThresholdInPercent>0.1</errorRateThresholdInPercent>
