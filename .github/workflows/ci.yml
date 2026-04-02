@@ -30,10 +30,6 @@ jobs:
         run: mvn clean test
         continue-on-error: true
 
-      - name: Gerar Relatório Allure
-        if: always()
-        run: mvn allure:report
-
       - name: Carregar histórico do Allure (gh-pages)
         uses: actions/checkout@v4
         if: always()
@@ -46,10 +42,12 @@ jobs:
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
+          # Apontando para as pastas de resultados de cada módulo para unificação
           allure_results: "teste-blogdoagi/target/allure-results,teste-dogapi/target/allure-results"
           gh_pages: gh-pages-dir
           allure_report: allure-report
           allure_history: allure-history
+          keep_reports: 20
 
       - name: Deploy do Relatório para o GitHub Pages
         if: always()

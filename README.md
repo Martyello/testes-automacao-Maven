@@ -1,129 +1,82 @@
-# Teste de Automação - Agibank
+# 🚀 Framework de Testes Unificados - Agibank
 
-## 📌 Sobre o projeto
-
-Este projeto tem como objetivo validar funcionalidades por meio de testes automatizados:
-- **Testes Web** - Busca no Blog do Agibank (Selenium)
-- **Testes API** - Dog CEO API (REST Assured)
+Este repositório contém uma solução de automação **Full Stack**, cobrindo testes de **Interface Web** e **API REST**. A
+arquitetura foi desenhada em um modelo **multi-módulo Maven**, permitindo a execução independente ou combinada dos
+contextos de teste.
 
 ---
 
-## 🐕 Testes API - Dog CEO API
+## 🏗️ Arquitetura e Tecnologias
 
-### Endpoints Testados
+O projeto foi estruturado para ser escalável e de fácil manutenção, utilizando:
 
-| Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/breeds/list/all` | GET | Lista todas as raças |
-| `/breed/{breed}/images` | GET | Imagens por raça |
-| `/breeds/image/random` | GET | Imagem aleatória |
-
-### Cenários de Teste
-
-#### GET /breeds/list/all
-- ✅ Retorna status 200 e status "success"
-- ✅ Retorna lista não vazia de raças
-- ✅ Contém raças conhecidas (bulldog, labrador, poodle)
-- ✅ Retorna sub-raças para bulldog
-- ✅ Retorna Content-Type JSON
-- ✅ Responde em tempo aceitável (< 5s)
-
-#### GET /breed/{breed}/images
-- ✅ Retorna imagens para raça válida
-- ✅ Retorna imagens para múltiplas raças (parametrizado)
-- ✅ URLs das imagens são válidas
-- ✅ Retorna erro 404 para raça inexistente
-- ✅ Retorna imagens para sub-raça
-- ✅ Responde em tempo aceitável (< 5s)
-
-#### GET /breeds/image/random
-- ✅ Retorna status 200 e status "success"
-- ✅ Retorna URL válida de imagem
-- ✅ Imagem possui extensão válida (jpg, png, gif)
-- ✅ Retorna imagens diferentes (aleatoriedade)
-- ✅ Retorna múltiplas imagens quando solicitado
-- ✅ Respeita limite máximo de imagens
-- ✅ Retorna Content-Type JSON
-- ✅ Responde em tempo aceitável (< 5s)
+* **Linguagem:** Java 17 (LTS)
+* **Core:** JUnit 5 (Jupyter) para orquestração.
+* **API:** REST Assured com validação de **JSON Schema**.
+* **Web:** Selenium WebDriver (configurado para execução em **Headless Mode** no CI).
+* **Relatórios:** Allure Framework com histórico de execução (Trends).
+* **CI/CD:** GitHub Actions com deploy automático para **GitHub Pages**.
 
 ---
 
-## 🌐 Testes Web - Blog do Agi
+## 🧪 Estratégia de Testes
 
-### Cenários cobertos:
-- ✅ Busca com termo válido
-- ✅ Busca sem informar termo
-- ✅ Busca com caracteres especiais
-- ✅ Busca com termo inexistente
+### 1. Módulo Web (`teste-blogdoagi`)
 
----
+Focado na validação do mecanismo de busca do Blog Agibank.
 
-## 🛠️ Tecnologias utilizadas
+* **Técnicas:** Testes de busca positiva, negativa, caracteres especiais e termos vazios.
+* **Destaque:** Implementação robusta de esperas (Waits) para lidar com a renderização de elementos assíncronos.
 
-| Tecnologia | Uso |
-|------------|-----|
-| Java 17 | Linguagem |
-| Maven | Build/Dependências |
-| JUnit 5 | Framework de testes |
-| REST Assured | Testes API |
-| Selenium WebDriver | Testes Web |
-| Allure | Relatórios |
-| GitHub Actions | CI/CD |
+### 2. Módulo API (`teste-dogapi`)
+
+Consome a [Dog CEO API](https://dog.ceo/dog-api/).
+
+* **Validações:** Status codes, estrutura do corpo (Schemas), tipos de dados e performance (SLA de resposta < 5s).
+* **Cenários:** Cobertura de endpoints de raças, sub-raças e imagens aleatórias, incluindo fluxos de exceção (404 e
+  parâmetros inválidos).
 
 ---
 
-## 📂 Estrutura do projeto
-testes-automacao-agibank/
-├── teste-blogdoagi/              # Testes Web
-│   └── src/test/java/web/
-│       └── BuscaBlogAgibankTest.java
-├── teste-dogapi/                 # Testes API
-│   └── src/test/java/api/
-│       ├── base/BaseTest.java
-│       ├── model/DogApiResponse.java
-│       └── tests/
-│           ├── BreedsListTest.java
-│           ├── BreedImagesTest.java
-│           └── RandomImageTest.java
-├── .github/workflows/ci.yml
-├── pom.xml
-└── README.md
+## 📊 Relatórios e Observabilidade
+
+Os relatórios são gerados automaticamente a cada execução do pipeline. O **Allure Report** consolida os resultados de
+ambos os módulos em um único dashboard navegável.
+
+🔗 **[Acesse aqui o Allure Report do Projeto](https://martyello.github.io/testes-automacao-agibank/)**
+
+> **Nota:** O dashboard inclui screenshots em caso de falhas na camada Web e o log completo das requisições/respostas na
+> camada de API.
+
 ---
 
-## ▶️ Como executar
+## 🛠️ Execução Local
 
 ### Pré-requisitos
-- Java 17+
-- Maven 3.6+
-- Google Chrome (para testes Web)
 
-### Todos os testes
-```bash
-mvn clean test
+* JDK 17 ou superior.
+* Maven 3.6+.
+* Google Chrome (versão atualizada).
 
-Apenas testes Web
-bash
+### Comandos principais
 
-Copiar código
-mvn clean test -pl teste-blogdoagi
+| Objetivo               | Comando                              |
+|:-----------------------|:-------------------------------------|
+| **Executar tudo**      | `mvn clean test`                     |
+| **Apenas Web**         | `mvn clean test -pl teste-blogdoagi` |
+| **Apenas API**         | `mvn clean test -pl teste-dogapi`    |
+| **Abrir Allure Local** | `mvn allure:serve`                   |
 
-Apenas testes API
-bash
+---
 
-Copiar código
-mvn clean test -pl teste-dogapi
+## ⚙️ Pipeline de CI/CD
 
-Gerar relatório Allure
-bash
+O workflow no GitHub Actions (`.github/workflows/ci.yml`) executa as seguintes etapas:
 
-Copiar código
-mvn clean test -pl teste-dogapi
-mvn allure:serve -pl teste-dogapi
+1. Setup do ambiente (Java, Chrome, Dependências).
+2. Execução dos testes via Maven.
+3. Coleta e unificação dos resultados do Allure.
+4. Publicação do relatório na branch `gh-pages`.
 
-🔄 CI/CD
-O projeto utiliza GitHub Actions para execução automática.
-Os testes rodam a cada push na branch main.
-
-👤 Autor
-Marcelo Alexandre do Nascimento
-
+---
+**Autor:** Marcelo Alexandre do Nascimento (Senior Test Analyst)
