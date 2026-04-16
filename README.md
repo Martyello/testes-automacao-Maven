@@ -1,4 +1,4 @@
-# 🚀 Framework de Testes Unificados - Agibank
+# 🚀 Framework de Testes Unificados
 
 Este repositório contém uma solução de automação **Full Stack**, cobrindo testes de **Interface Web**, **API REST** e **Performance**. A arquitetura utiliza um modelo **multi-módulo Maven**, permitindo a gestão independente de cada contexto de teste.
 
